@@ -1,0 +1,106 @@
+{% extends 'admin/master.html' %}
+
+{% block admin_content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12"><h1 class="display-4 text-center mb-4">{{ _l('Панель администратора') }}</h1></div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Управление товарами</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-users fa-2x text-primary mr-3"></i>
+                                    <div>
+                                        <h5 class="mb-0">{{ _l('Users Mgmt') }}</h5>
+                                        <p class="text-muted mb-0">{{ _l('Manage user accounts and permissions.') }}</p>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('user.index_view') }}"
+                                   class="btn btn-primary btn-block mt-3">{{ _l('Manage Users') }}</a>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-box fa-2x text-success mr-3"></i>
+                                    <div>
+                                        <h5 class="mb-0">Товары</h5>
+                                        <p class="text-muted mb-0">Управление товарами</p>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('goods.index_view') }}"
+                                   class="btn btn-success btn-block mt-3">Управление товарами</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-tags fa-2x text-info mr-3"></i>
+                                    <div>
+                                        <h5 class="mb-0">{{ _l('Categories Mgmt') }}</h5>
+                                        <p class="text-muted mb-0">Управление категориями товаров</p>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('category.index_view') }}"
+                                   class="btn btn-info btn-block mt-3">Категории</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-comments fa-2x text-secondary mr-3"></i>
+                                    <div>
+                                        <h5 class="mb-0">Отзывы на товары</h5>
+                                        <p class="text-muted mb-0">Управление отзывами</p>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('review.index_view') }}"
+                                   class="btn btn-secondary btn-block mt-3">Отзывы</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">{{ _l('Reports and Statistics Mgmt') }}</h4>
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="fas fa-chart-bar fa-2x text-info mr-3"></i>
+                            <div>
+                                <h5 class="mb-0">{{ _l('Statistics Mgmt') }}</h5>
+                                <p class="text-muted mb-0">Просмотр статистики.</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('statistics.index') }}"
+                           class="btn btn-info btn-block mb-4">{{ _l('View Statistics') }}</a>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-file-alt fa-2x text-secondary mr-3"></i>
+                            <div>
+                                <h5 class="mb-0">{{ _l('Reports Mgmt') }}</h5>
+                                <p class="text-muted mb-0">{{ _l('Generate and view various reports.') }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('reports.index') }}"
+                           class="btn btn-secondary btn-block">{{ _l('View Reports') }}</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning mr-3"></i>
+                            <div>
+                                <h5 class="mb-0">{{ _l('Reported reviews Mgmt') }}</h5>
+                                <p class="text-muted mb-0">{{ _l('Check reported reviews.') }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('reportedreview.index_view') }}"
+                           class="btn btn-warning btn-block mt-3">{{ _l('View Reports') }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

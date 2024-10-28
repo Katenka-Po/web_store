@@ -1,0 +1,91 @@
+<header>
+    <nav class="navbar fixed-top navbar-dark bg-dark navbar-expand-md box-shadow">
+        <div class="container"><a href="/" class="navbar-brand d-flex align-items-center">
+            <i class="fa fa-cart-plus fa-lg mr-2"></i>
+            {{ config.SHOP_NAME }} </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="{{ _l('Toggle navigation') }}"><span
+                    class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto d-md-flex d-none">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item"><a href="{{ url_for('profile') }}" class="nav-link">{{ _l('Профиль') }}</a>
+                        </li>
+                        {% if current_user.is_admin %}
+                            <li class="nav-item"><a href="{{ url_for('admin.index') }}"
+                                                    class="nav-link">{{ _l('Панель администратора') }}</a></li>
+                        {% endif %}
+                        <li class="nav-item"><a href="{{ url_for('notifications') }}" class="nav-link"> <i
+                                class="fas fa-bell"></i> {% if unread_notifications_count > 0 %}
+                            <span class="badge badge-danger">{{ unread_notifications_count }}</span> {% endif %} </a>
+                        </li>
+                        <li class="nav-item"><a href="{{ url_for('purchase_history') }}"
+                                                class="nav-link">{{ _l('История покупок') }}</a></li>
+                        <li class="nav-item"><a href="{{ url_for('compare_products') }}"
+                                                class="nav-link">Сравнение товаров</a></li>
+                        <li class="nav-item"><a href="{{ url_for('logout') }}" class="nav-link">{{ _l('Выйти') }}</a>
+                        </li> {% else %}
+                        <li class="nav-item"><a href="{{ url_for('register') }}"
+                                                class="nav-link">{{ _l('Регистрация') }}</a>
+                        </li>
+                        <li class="nav-item"><a href="{{ url_for('login') }}" class="nav-link">{{ _l('Войти') }}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <div class="ml-auto d-flex align-items-center">
+                    <div class="dropdown d-md-none">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="mobileMenuDropdown"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
+                                class="fas fa-bars"></i></button>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="mobileMenuDropdown">
+                            {% if current_user.is_authenticated %}
+                                <a class="dropdown-item" href="{{ url_for('profile') }}">{{ _l('Профиль') }}</a>
+                                <a class="dropdown-item"
+                                   href="{{ url_for('notifications') }}"> {{ _l('Увеломления') }}
+                                    {% if unread_notifications_count > 0 %}
+                                        <span class="badge badge-danger">{{ unread_notifications_count }}</span> {% endif %}
+                                </a><a class="dropdown-item"
+                                       href="{{ url_for('purchase_history') }}">{{ _l('purchase_history') }}</a>
+                                <a class="dropdown-item"
+                                   href="{{ url_for('compare_products') }}">{{ _l('Product Comparison') }}</a>
+                                <a class="dropdown-item"
+                                   href="{{ url_for('logout') }}">{{ _l('Logout') }}</a>
+                            {% else %}
+                                <a class="dropdown-item" href="{{ url_for('register') }}">{{ _l('Register') }}</a>
+                                <a class="dropdown-item" href="{{ url_for('login') }}">{{ _l('Login') }}</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if request.endpoint != 'profile' and request.endpoint != 'purchase_history' and request.endpoint != 'logout' %}
+                        <form action="{{ url_for('search_route') }}" method="GET"
+                              class="form-inline my-2 my-lg-0 mr-3 position-relative">
+                            <div class="input-group"><input type="text" name="query" class="form-control"
+                                                            id="searchInput"
+                                                            placeholder="{{ _l('Search products...') }}"
+                                                            aria-label="{{ _l('Search') }}"
+                                                            aria-describedby="search-button">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-light" type="submit" id="search-button"><i
+                                            class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+                            <div id="autocompleteResults" class="autocomplete-results">
+                                <div id="autocompleteItems"></div>
+                            </div>
+                        </form> {% endif %} <a href="{{ url_for('cart') }}"
+                                               class="btn btn-light d-flex align-items-center position-relative"
+                                               id="cartPopover" data-toggle="popover" data-placement="bottom"
+                                               data-html="true" data-content=""> <i
+                        class="fas fa-shopping-cart fa-lg mr-2"></i>
+                    <div class="d-inline-block text-center">
+                        <div class="font-weight-bold"
+                             id="header-total-items">{{ total_items|default(0, true) }} {{ _l('item(s)') }}</div>
+                        <div class="font-weight-bold" id="header-total-price">
+                            ₽{{ '{:,.2f}'.format(total_amount|default(0, true)) }}</div>
+                    </div>
+                </a></div>
+            </div>
+        </div>
+    </nav>
+</header>

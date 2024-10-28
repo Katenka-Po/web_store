@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ config.SHOP_NAME }} - {{ _l('История покупок') }}
+{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        <h2 class="mb-4">{{ _l('История покупок') }}</h2>
+        {% if purchases %}
+            <div class="row">
+                {% for purchase in purchases %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ _l('Order #%(id)d', id=purchase.id) }}</h5>
+                                <p class="card-text">
+                                    <strong>{{ _l('Date:') }}</strong> {{ purchase.date.strftime('%Y-%m-%d %H:%M') }}<br>
+                                    <strong>{{ _l('Total Price:') }}</strong>
+                                    руб. {{ purchase.items_subtotal + purchase.delivery_fee }}<br>
+                                    <strong>{{ _l('Status:') }}</strong> {{ purchase.status }}
+                                </p>
+                                <div class="mt-auto">
+                                    <a href="{{ url_for('purchase_details', purchase_id=purchase.id) }}"
+                                       class="btn btn-primary btn-block mb-2">{{ _l('View Details') }}</a>
+                                    {% if purchase.status == 'Pending' %}
+                                        <form action="{{ url_for('cancel_order', purchase_id=purchase.id) }}" method="POST">
+                                            <button type="submit" class="btn btn-danger btn-block"
+                                                    onclick="return confirm('{{ _l('Are you sure you want to cancel this order?') }}')">{{ _l('Cancel Order') }}</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">{{ _l('История покупок не найдена') }}</div>
+        {% endif %}
+    </div>
+{% endblock %}

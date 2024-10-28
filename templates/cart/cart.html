@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ config.SHOP_NAME }} - {{ _l('Shopping Cart') }}
+{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        <h2 class="text-center mb-4">{{ _l('Shopping Cart') }}</h2>
+        <div id="shoppingCart">
+            {% if cart|length != 0 %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="text-center align-middle">#</th>
+                            <th scope="col" class="text-center align-middle">{{ _l('Item') }}</th>
+                            <th scope="col" class="text-center align-middle">{{ _l('Name') }}</th>
+                            <th scope="col" class="text-center align-middle">{{ _l('Options') }}</th>
+                            <th scope="col" class="text-center align-middle">{{ _l('Quantity') }}</th>
+                            <th scope="col" class="text-center align-middle">{{ _l('Unit Price') }}</th>
+                            <th scope="col" class="text-center align-middle">{{ _l('Sub-Total') }}</th>
+                            <th scope="col" class="text-center align-middle"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in cart %}
+                            <tr>
+                                <th scope="row" class="text-center align-middle">{{ loop.index }}</th>
+                                <td class="text-center align-middle">
+                                    <img src="{{ url_for('static', filename='img/' + item.goods.image) }}" width="100px"
+                                         loading="lazy" alt="{{ item.goods.samplename }}"
+                                         class="img-thumbnail cursor-pointer" data-toggle="modal"
+                                         data-target="#imageModal{{ loop.index }}">
+                                </td>
+                                <td class="text-center align-middle">{{ item.goods.samplename }}</td>
+                                <td class="text-center align-middle">
+                                    {% if item.variant_options and item.variant_options != '{}' %}
+                                        {% set variant_options = item.variant_options|from_json %}
+                                        {% if variant_options %}
+                                            {% for key, value in variant_options.items() %}
+                                                <span class="badge badge-pill badge-secondary mr-2">{{ key }}: {{ value }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="badge badge-pill badge-secondary mr-2">{{ _l('No options selected') }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge badge-pill badge-secondary mr-2">{{ _l('No options selected') }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center align-middle">
+                                    <form action="{{ url_for('update_cart_route') }}" method="post"
+                                          class="form-inline justify-content-center" onsubmit="return false;">
+                                        <input type="hidden" name="cart_item_id" value="{{ item.id }}"/>
+                                        <div class="input-group input-group-sm justify-content-center">
+                                            <div class="input-group-prepend">
+                                                <button class="btn btn-outline-secondary" type="button"
+                                                        onclick="updateQuantity(this, -1)">-
+                                                </button>
+                                            </div>
+                                            <input type="number" name="quantity" min="1" value="{{ item.quantity }}"
+                                                   class="form-control form-control-sm text-center"
+                                                   style="width: 60px;" onchange="updateQuantity(this)">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button"
+                                                        onclick="updateQuantity(this, 1)">+
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="text-center align-middle">{{ '₽{:,.2f}'.format(item.price) }}</td>
+                                <td class="text-center align-middle">{{ '₽{:,.2f}'.format(item.price * item.quantity) }}</td>
+                                <td class="text-center align-middle">
+                                    <form action="{{ url_for('remove_from_cart_route', cart_item_id=item.id) }}">
+                                        <button type="submit" class="btn btn-link text-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <!-- Image Modal -->
+                            <div class="modal fade" id="imageModal{{ loop.index }}" tabindex="-1" role="dialog"
+                                 aria-labelledby="imageModalLabel{{ loop.index }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"
+                                                id="imageModalLabel{{ loop.index }}">{{ item.goods.samplename }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="{{ _l('Close') }}">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <img src="{{ url_for('static', filename='img/' + item.goods.image) }}"
+                                                 alt="{{ item.goods.samplename }}" class="img-fluid lazy">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ _l('Cart Summary') }}</h5>
+                                <table class="table table-sm">
+                                    <tbody>
+                                    <tr>
+                                        <td>{{ _l('Subtotal:') }}</td>
+                                        <td class="text-right" id="subtotal">{{ '₽{:,.2f}'.format(subtotal) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>{{ _l('Total:') }}</strong></td>
+                                        <td class="text-right"
+                                            id="cart-total">{{ '₽{:,.2f}'.format(total_amount) }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <a href="{{ url_for('index') }}"
+                                   class="btn btn-outline-primary btn-block mb-2">{{ _l('Continue Shopping') }}</a>
+                                <a href="{{ url_for('checkout') }}"
+                                   class="btn btn-primary btn-block">{{ _l('Proceed to Checkout') }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='img/empty_cart.png') }}" alt="{{ _l('Empty Cart') }}"
+                         class="img-fluid mb-4 lazy" style="max-width: 200px;">
+                    <h3>{{ _l('Your cart is empty!') }}</h3>
+                    <p class="lead">{{ _l("Looks like you haven't added any items to your cart yet.") }}</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        {{ _l('Start Shopping Now') }}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        var cantChangeAmountMessage = "{{ _l('Cant change amount!') }}";
+        var quantityTooLowMessage = "{{ _l('Quantity cannot be less than 1. If you want to remove the item, please use the remove button.') }}";
+        var errorMessage = "{{ _l('Error:') }}";
+        var itemsMessage = "{{ _l('item(s)') }}";
+
+        function updateQuantity(element, change = 0) {
+            const form = element.closest('form');
+            const quantityInput = form.querySelector('input[name="quantity"]');
+            let quantity = parseInt(quantityInput.value);
+            if (change !== 0) {
+                quantity += change;
+                if (quantity < 1) {
+                    alert(quantityTooLowMessage);  
+                    return;
+                }
+                quantityInput.value = quantity;
+            }
+
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.status) {
+                        document.getElementById('subtotal').textContent = data.subtotal;
+                        document.getElementById('cart-total').textContent = data.cart_total;
+                        document.getElementById('header-total-items').textContent = data.cart_items + " " + itemsMessage;
+                        document.getElementById('header-total-price').textContent = data.cart_total;
+
+                        const tableRow = element.closest('tr');
+                        const subtotalCell = tableRow.querySelector('td:nth-child(7)');
+                        subtotalCell.textContent = data.item_subtotal;
+
+                    } else {
+                        console.error(cantChangeAmountMessage);  
+                        alert(cantChangeAmountMessage);  
+                        quantityInput.value = data.current_quantity;
+                    }
+                })
+                .catch(error => {
+                    console.error(errorMessage, error);  
+                });
+        }
+    </script>
+
+    <style>
+            .input-group {
+            justify-content: center;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .table thead th {
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
+        }
+
+        .badge-pill {
+            padding-right: .6em;
+            padding-left: .6em;
+            border-radius: 10rem;
+        }
+    </style>
+{% endblock %}

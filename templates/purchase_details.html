@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">{{ _l('Purchase Details') }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>{{ _l('Order ID:') }}</strong> {{ purchase.id }}</p>
+                                <p><strong>{{ _l('Date:') }}</strong> {{ purchase.date.strftime('%Y-%m-%d %H:%M') }}</p>
+                                <p>
+                                    <strong>{{ _l('Status:') }}</strong>
+                                    <span class="badge badge-{{ 'success' if purchase.status == 'Completed' else 'warning' if purchase.status == 'Pending' else 'danger' }}">{{ purchase.status }}</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>{{ _l('Shipping Address:') }}</strong></p>
+                                <ul class="list-unstyled">
+                                    <li>{{ purchase.shipping_address.address_line1 }}</li>
+                                    {% if purchase.shipping_address.address_line2 %}
+                                        <li>{{ purchase.shipping_address.address_line2 }}</li>
+                                    {% endif %}
+                                    <li>{{ purchase.shipping_address.city }}, {{ purchase.shipping_address.state }} {{ purchase.shipping_address.zip_code }}</li>
+                                    <li>{{ purchase.shipping_address.country }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <hr>
+                        <h5 class="mb-4">{{ _l('Items:') }}</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>{{ _l('Product') }}</th>
+                                        <th>{{ _l('Quantity') }}</th>
+                                        <th>{{ _l('Price') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in purchase.items %}
+                                        <tr>
+                                            <td>{{ item.goods.samplename }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>руб. {{ item.price }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                {% set items_subtotal = purchase.items|sum(attribute='price') %}
+                                <p><strong>{{ _l('Subtotal:') }}</strong> ${{ items_subtotal }}</p>
+                                <p><strong>{{ _l('Discount:') }}</strong> ${{ purchase.discount_amount }}</p>
+                                <p><strong>{{ _l('Delivery Fee:') }}</strong> ${{ purchase.delivery_fee }}</p>
+                            </div>
+                            <div class="col-md-6 text-md-right">
+                                <h4><strong>{{ _l('Total Price:') }}</strong> ${{ items_subtotal - purchase.discount_amount + purchase.delivery_fee }}</h4>
+                            </div>
+                        </div>
+                        {% if purchase.status == 'Pending' %}
+                            <hr>
+                            <div class="text-center">
+                                <form action="{{ url_for('cancel_order', purchase_id=purchase.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('{{ _l('Are you sure you want to cancel this order?') }}')">{{ _l('Cancel Order') }}</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

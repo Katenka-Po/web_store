@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ config.SHOP_NAME }} - {{ _l('Home') }}
+{% endblock %}
+
+{% block body %}
+    <!-- Main Store Body -->
+    {% if session['user'] %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="{{ _l('Close') }}">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong>{{ _l('Welcome') }}, {{ session['user'] }}!</strong> {{ _l('We hope you enjoy your shopping experience.') }}
+        </div>
+    {% endif %}
+
+    <!-- Product Filter Section -->
+    <section class="container my-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="card-title mb-4 text-center">{{ _l('Filter Products') }}</h4>
+                <form action="{{ url_for('filter_route') }}" method="GET" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-list"></i></span>
+                                </div>
+                                <select class="custom-select" id="category" name="category_id" required>
+                                    <option value="" disabled
+                                            {% if not request.args.get('category_id') %}selected{% endif %}>{{ _l('Choose Category') }}</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}"
+                                                {% if request.args.get('category_id')|int == category.id %}selected{% endif %}>
+                                            {{ category.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">{{ _l('Please select a category.') }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-sort"></i></span>
+                                </div>
+                                <select class="custom-select" id="sort_by" name="sort_by" required>
+                                    <option value="" disabled
+                                            {% if not request.args.get('sort_by') %}selected{% endif %}>{{ _l('Sort By') }}</option>
+                                    <option value="price_asc"
+                                            {% if request.args.get('sort_by') == 'price_asc' %}selected{% endif %}>
+                                        {{ _l('Price: Low to High') }}
+                                    </option>
+                                    <option value="price_desc"
+                                            {% if request.args.get('sort_by') == 'price_desc' %}selected{% endif %}>
+                                        {{ _l('Price: High to Low') }}
+                                    </option>
+                                    <option value="rating"
+                                            {% if request.args.get('sort_by') == 'rating' %}selected{% endif %}>
+                                        {{ _l('Rating') }}
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback">{{ _l('Please select a sorting option.') }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="name_query" name="name_query"
+                                       value="{{ request.args.get('name_query', '') }}"
+                                       placeholder="{{ _l('Product Name') }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="tag_query" name="tag_query"
+                                       value="{{ request.args.get('tag_query', '') }}" placeholder="{{ _l('Tags') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3 d-flex align-items-center justify-content-end">
+                            <button type="submit" class="btn btn-primary">{{ _l('Apply Filters') }}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+        
+    
+    <!-- Product List Section -->
+    <section class="container my-5">
+        {% if shirts|length > 0 %}
+            {% set start_index = (current_page - 1) * per_page + 1 %}
+            {% set end_index = start_index + shirts|length - 1 %}
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+                <h3>{{ _l('All Products') }}</h3>
+                <span>{{ _l('Showing') }} {{ start_index }} - {{ end_index }} {{ _l('of') }} {{ in_total }} {{ _l('products') }}</span>
+            </div>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for shirt in shirts %}
+                    <div class="col">
+                        <div class="card h-100">
+                            <img src="{{ url_for('static', filename='img/' + shirt.image) }}" class="card-img-top"
+                                 alt="{{ shirt.samplename }}" loading="lazy">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ shirt.samplename }}</h5>
+                                <p class="card-text">{{ shirt.description[:100] }}...</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        {% if shirt.onSale %}
+                                            <span class="text-danger font-weight-bold">{{ '₽{:,.2f}'.format(shirt.onSalePrice) }}</span>
+                                            <span class="text-muted ml-2"><del>{{ '₽{:,.2f}'.format(shirt.price) }}</del></span>
+                                        {% else %}
+                                            <span class="font-weight-bold">{{ '₽{:,.2f}'.format(shirt.price) }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        {% if shirt.avg_rating %}
+                                            <span class="text-warning">
+                                            {% for i in range(1, 6) %}
+                                                <i class="fas fa-star{% if i > shirt.avg_rating %} text-muted{% endif %}"></i>
+                                            {% endfor %}
+                                        </span>
+                                            <span class="ml-1">({{ shirt.avg_rating }})</span>
+                                        {% else %}
+                                            <span class="text-muted">{{ _l('No ratings') }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="tags mb-4">
+                                    {% if shirt.tags %}
+                                        {% for tag in shirt.tags %}
+                                            <span class="badge badge-secondary mr-2 px-3 py-2">{{ tag.name }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if shirt.stock == 0 %}
+                                        <span class="badge badge-danger mr-2 px-3 py-2">{{ _l('Out of Stock') }}</span>
+                                    {% elif shirt.stock < 3 %}
+                                        <span class="badge badge-danger mr-2 px-3 py-2">{{ _l('Low Stock') }}: {{ shirt.stock }}</span>
+                                    {% elif shirt.stock < 10 %}
+                                        <span class="badge badge-warning mr-2 px-3 py-2">{{ _l('Hurry Up') }}: {{ shirt.stock }}</span>
+                                    {% else %}
+                                        <span class="badge badge-success mr-2 px-3 py-2">{{ _l('In Stock') }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-footer text-center">
+                                <a href="{{ url_for('goods_page', id=shirt.id) }}"
+                                   class="btn btn-primary">{{ _l('View Details') }}</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="col">
+                <p>{{ _l('No products found.') }}</p>
+            </div>
+        {% endif %}
+
+        {% if total_pages > 1 %}
+            <nav aria-label="{{ _l('Page navigation') }}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if current_page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ current_page - 1 }}" aria-label="{{ _l('Previous') }}">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for page in range(1, total_pages + 1) %}
+                        <li class="page-item {% if page == current_page %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if current_page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ current_page + 1 }}" aria-label="{{ _l('Next') }}">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </section>
+{% endblock %}

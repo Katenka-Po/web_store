@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{ config.SHOP_NAME }} - {{ _l('Register') }}{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">{{ _l('Create an Account') }}</h2>
+                        <form action="{{ url_for('register') }}" class="form" method="post">
+                            {{ form.hidden_tag() }}
+                            <div class="form-group">
+                                {{ form.username(class="form-control", placeholder=_l("Username"), required=True) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.email(class="form-control", placeholder=_l("Email"), required=True) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.password(class="form-control", placeholder=_l("Password"), required=True) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.confirm_password(class="form-control", placeholder=_l("Confirm Password"), required=True) }}
+                            </div>
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="terms" required>
+                                    <label class="form-check-label" for="terms">{{ _l('I agree to the') }} <a href="/terms" class="text-primary">{{ _l('Terms and Conditions') }}</a></label>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="reset" class="btn btn-secondary mr-2">{{ _l('Clear') }}</button>
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                        <hr>
+                        <div class="text-center">
+                            <p>{{ _l('Already have an account?') }} <a href="{{ url_for('login') }}" class="text-primary">{{ _l('Log in') }}</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
